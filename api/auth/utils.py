@@ -5,6 +5,7 @@ from fastapi import HTTPException, status, Depends
 from fastapi.requests import Request
 from passlib.context import CryptContext
 
+from models import User
 from .model import UserModel
 from config import settings
 
@@ -19,8 +20,7 @@ def get_password_hash(password):
     return pwd_context.hash(password)
 
 
-async def authenticate_user(instance, email: str, password: str):
-    user = await instance.find_by_email(email=email)
+async def authenticate_user(user: User, password: str):
 
     if user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='User not found')
@@ -66,4 +66,5 @@ async def get_current_user(token=Depends(get_token)):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Invalid token')
 
     email = payload.get("sub")
-    return await UserModel.find_by_email(email=email)
+    user = await UserModel.find_by_email(email=email)
+    return user
