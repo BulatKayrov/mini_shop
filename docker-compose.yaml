@@ -15,3 +15,25 @@ services:
       - .env
     ports:
       - "5432:5432"
+
+  shop:
+    build:
+      context: .
+    container_name: shop
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    command: docker/start.sh
+    depends_on:
+      - database
+      - redis
+
+  celery:
+    build:
+      context: .
+    container_name: celery
+    depends_on:
+      - shop
+
+    command: docker/celery.sh

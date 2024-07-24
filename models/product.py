@@ -16,7 +16,6 @@ class Product(Base):
     price: Mapped[int]
     description: Mapped[str | None]
     image: Mapped[str | None]
-    quantity_for_cart: Mapped[int] = mapped_column(default=0)
 
     category_pk: Mapped[int] = mapped_column(ForeignKey(column='category.pk', ondelete='CASCADE'))
     category: Mapped['Category'] = relationship(back_populates='products')

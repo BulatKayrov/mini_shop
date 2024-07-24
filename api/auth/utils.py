@@ -4,6 +4,7 @@ import jwt.exceptions
 from fastapi import HTTPException, status, Depends
 from fastapi.requests import Request
 from passlib.context import CryptContext
+from fastapi.responses import Response
 
 from models import User
 from .model import UserModel
@@ -53,7 +54,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     return jwt_encode(payload=to_encode)
 
 
-async def get_current_user(token=Depends(get_token)):
+async def get_current_user(response: Response, token=Depends(get_token)):
 
     if token is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Token not found')
@@ -61,7 +62,8 @@ async def get_current_user(token=Depends(get_token)):
     try:
         payload = jwt_decode(token=token)
     except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Token expired')
+        response.set_cookie(key="token", value="", httponly=True, expires=0)
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Token expired...')
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Invalid token')
 

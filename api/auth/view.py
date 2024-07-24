@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from fastapi.responses import Response
 
 from tasks.task import send_message
 from .model import UserModel
 from .schema import UserCreate, UserResponse, UserLogin
-from .utils import authenticate_user, create_access_token, get_current_user, get_password_hash, verify_password
+from .utils import create_access_token, get_current_user, get_password_hash, verify_password
 
 router = APIRouter(prefix='/auth', tags=['Auth'])
 
@@ -12,7 +12,7 @@ router = APIRouter(prefix='/auth', tags=['Auth'])
 @router.post('/register', response_model=UserResponse)
 async def register_user(user: UserCreate):
     password = get_password_hash(password=user.password)
-    # send_message.delay(str(user.email))
+    send_message.delay(str(user.email))
     return await UserModel.create(email=user.email, password=password, image=user.image)
 
 
@@ -36,4 +36,3 @@ async def logout_user(response: Response):
 async def status_user(user=Depends(get_current_user)):
     if user:
         return {'data': user}
-    return {'status': 401}
